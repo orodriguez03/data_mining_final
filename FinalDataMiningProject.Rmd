@@ -1,0 +1,255 @@
+---
+title: "Data Mining Final Project"
+output:
+  html_document: default
+  word_document: default
+date: "2023-12-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Final Project
+
+By: Oswaldo Rodriguez and Hayu Mohammed
+
+```{r}
+library(tidyverse)
+library(arules)
+library(factoextra)
+library(ggsignif)
+library(rstatix)
+library(ggplot2)
+library(knitr)
+```
+
+## Introduction
+
+The NBA has a vast amount of data and machine learning capabilities. One of the biggest parts of the NBA is the player statistics which is based on big data and machine learning. Teams benefit from that data that shows field goal percentages, win percentage and more. The player stats like points per game, 2 pt percentage and more help better understand the vast majority of players. We use data to crown the NBA's next Most valuable players. In our research, we are curious on the statistics and which data points make a player stand out. We will look into clustering and better understanding how the grouping of players and their stats are in the NBA. We will further explain and understand the clustering of NBA player statistics.
+
+Our data that was gathered from Kaggle is appropriate for clustering. Our data provides so much statistics on the players. Our data includes 30 important variables that are important to understand players and how they rank in the league. It has stats on the players age, points per game, field goal percentage and many more. These data points are the vocal points of understanding which players are the best performing and how they correlate. We will continue to use this data to create clusters and better understand the players in each position.
+
+```{r knitr::opts_chunk$set(warning = FALSE, message = FALSE)}
+players <- read_delim("~/Downloads/2022-2023 NBA Player Stats - Regular1.csv",
+                      delim = ";", escape_double = FALSE, trim_ws = TRUE)
+```
+
+Lets take a look at our data first to see what variables are correlated with each other.
+
+```{r}
+player1 <- subset(players, select = -c(Rk, Player, Pos, Age, Tm))
+```
+
+```{r}
+cor(player1[,1:25])
+```
+
+PTS is highly correlated with GS, MP, FG, FGA, FT, FTA, DRB, TR, AST, STL, TOV, PF, FGA, 3P, 3PA, and 2P.
+
+## Clustering
+
+First, we organize the data to look for optimal numbers of clusters. Clusters are important to data machine learning and unsupervised learning. We use the clusters to better understand players by analytic clustering. The clustering graph helps us better understand the correlation between any two statistics and better understand how they relate. We wil continue to create clusters and better understand the NBA player data.
+
+```{r}
+players_scaled = players %>%
+  select(-Player, -Pos, -Tm, -Rk, -Age, -G, -GS, -MP, -FG, -FGA, -"FG%", -"3P", -"3PA", -"3P%", -"2P", -"2PA", -"2P%", -"eFG%", -FT, -FTA, -"FT%", -ORB, -DRB, -TRB, -STL, -BLK, -TOV, -PF) %>%
+  scale()
+```
+
+```{r}
+fviz_nbclust(players_scaled, kmeans, method = "wss")
+```
+
+```{r}
+fviz_nbclust(players_scaled, kmeans, method = "silhouette")
+```
+
+```{r}
+fviz_nbclust(players_scaled, kmeans, method = "gap_stat")
+```
+
+```{r}
+set.seed(1)
+cluster = kmeans(players_scaled,
+                 centers = 3,
+                 nstart = 25)
+fviz_cluster(
+  cluster,
+  data = players_scaled,
+  main = "Players Segmented by Points and Assists",
+  repel = TRUE
+)
+```
+
+```{r}
+cluster$size
+```
+
+It is important to better understand this cluster. We have created a cluster comparing two of the biggest tracked statistics in the league. Points and assists are one of the most important factors in evaluating scoring and play making that makes up a player. We can see that the vast majority of players are in the blue section which is the lowest points and assist. Great and efficient players like Ja Morant, Lebron James and Kevin Durant all fall within the green zone. The green zone is the players that are high scoring and great at play making. This data is important for MVP and award winning voters to understand and compare players.
+
+## Clustering by Steals and Blocks
+
+```{r}
+players_scaled1 = players %>%
+  select(-Player, -Pos, -Tm, -Rk, -Age, -G, -GS, -MP, -FG, -FGA, -"FG%", -"3P", -"3PA", -"3P%", -"2P", -"2PA", -"2P%", -"eFG%", -FT, -FTA, -"FT%", -ORB, -DRB, -TRB, -PTS, -AST, -TOV, -PF) %>%
+  scale()
+```
+
+```{r}
+fviz_nbclust(players_scaled1, kmeans, method = "wss")
+```
+
+```{r}
+fviz_nbclust(players_scaled1, kmeans, method = "silhouette")
+```
+
+```{r}
+fviz_nbclust(players_scaled, kmeans, method = "gap_stat")
+```
+
+```{r}
+set.seed(1)
+cluster1 = kmeans(players_scaled1,
+                 centers = 3,
+                 nstart = 25)
+fviz_cluster(
+  cluster1,
+  data = players_scaled1,
+  main = "Players Segmented by Steals and Blocks",
+  repel = TRUE
+)
+```
+
+When evaluating players defense is usually the part of the game that is over looked. When looking at the data we understand that the disparity between blocks and steals are wider. When looking at the comparison between blocks and assists we can see that players with high blocks usually dont tend to have high steals. Positions like center and power forward who are built taller and stronger have a easier ability to block versus the agile ability to steal.
+
+## Filtering
+
+Now we will filter the positions and analyze the clusters. Here we are taking a look at point guards.
+
+```{r}
+playersg <- filter(players, Pos == "PG")
+```
+
+```{r}
+players_scaled_g = playersg %>%
+  select(-Player, -Pos, -Tm, -Rk, -Age, -G, -GS, -MP, -FG, -FGA, -"FG%", -"3P", -"3PA", -"3P%", -"2P", -"2PA", -"2P%", -"eFG%", -FT, -FTA, -"FT%", -ORB, -DRB, -TRB, -STL, -BLK, -TOV, -PF) %>%
+  scale()
+```
+
+```{r}
+fviz_nbclust(players_scaled_g, kmeans, method = "wss")
+```
+
+```{r}
+fviz_nbclust(players_scaled_g, kmeans, method = "silhouette")
+```
+
+```{r}
+fviz_nbclust(players_scaled_g, kmeans, method = "gap_stat")
+```
+
+```{r}
+set.seed(1)
+clusterg = kmeans(players_scaled_g,
+                 centers = 3,
+                 nstart = 25)
+fviz_cluster(
+  clusterg,
+  data = players_scaled_g,
+  main = "Point Guards Segmented by Points and Assists",
+  repel = TRUE
+)
+```
+
+We are creating a new column here.
+
+```{r}
+playersg$cluster <- as.integer(clusterg$cluster)
+```
+
+```{r}
+ggplot(data = playersg,
+       aes(x = scale(PTS), y = scale(AST), color = factor(cluster), size=2.5)) +
+  geom_point()
+```
+
+Looking at the clusters above we can better understand the point guard position in the NBA. Point guards are the playmakers of the team. As we can see in the graph, most point guards are in the lower section of the graph towards the assists. What makes a great point guard is the ability to score and also make assists. The green section of the cluster is where the league's best point guards with a high number of points and assists.
+
+Here we are taking a look at power forwards.
+
+```{r}
+playerspf <- filter(players, Pos == "PF")
+```
+
+```{r}
+players_scaled_pf = playerspf %>%
+  select(-Player, -Pos, -Tm, -Rk, -Age, -G, -GS, -MP, -FG, -FGA, -"FG%", -"3P", -"3PA", -"3P%", -"2P", -"2PA", -"2P%", -"eFG%", -FT, -FTA, -"FT%", -ORB, -DRB, -TRB, -STL, -BLK, -TOV, -PF) %>%
+  scale()
+```
+
+```{r}
+fviz_nbclust(players_scaled_pf, kmeans, method = "wss")
+```
+
+```{r}
+fviz_nbclust(players_scaled_g, kmeans, method = "silhouette")
+```
+
+```{r}
+fviz_nbclust(players_scaled_g, kmeans, method = "gap_stat")
+```
+
+```{r}
+set.seed(1)
+clusterpf = kmeans(players_scaled_pf,
+                 centers = 3,
+                 nstart = 25)
+fviz_cluster(
+  clusterpf,
+  data = players_scaled_pf,
+  main = "Power Forwards Segmented by Points and Assists",
+  repel = TRUE
+)
+```
+
+We also decided to look into the specific position of point guard. According to NBA statistics the power forward position has the 2nd most won MVP's in the league. The power forward position gives the ability to be a scorer and playmaker in our league. The size and length of power forwards give them the advantage to be a great defensive player but also the quickness and shot of a point guard. As our league evolves we are noticing positions like 6'8 and above power forwards and centers have the ability to play like 6'2 point guards.
+
+Now lets take a look at steals and blocks of a power forward.
+
+```{r}
+playerspf1 <- filter(players, Pos == "PF")
+```
+
+```{r}
+players_scaled_pf4 = playerspf1 %>%
+  select(-Player, -Pos, -Tm, -Rk, -Age, -G, -GS, -MP, -FG, -FGA, -"FG%", -"3P", -"3PA", -"3P%", -"2P", -"2PA", -"2P%", -"eFG%", -FT, -FTA, -"FT%", -ORB, -DRB, -TRB, -PTS, -AST, -TOV, -PF) %>%
+  scale()
+```
+
+```{r}
+set.seed(1)
+clusterpf4 = kmeans(players_scaled_pf4,
+                 centers = 3,
+                 nstart = 25)
+fviz_cluster(
+  clusterpf4,
+  data = players_scaled_pf4,
+  main = "Power Forwards Segmented by Steals and Blocks",
+  repel = TRUE
+)
+```
+
+```{r}
+playerspf1$cluster <- as.integer(clusterpf4$cluster)
+```
+
+```{r}
+ggplot(data = playerspf1,
+       aes(x = scale(STL), y = scale(BLK), color = factor(cluster), size=2.5)) +
+  geom_point()
+```
+
+## Conclusion
+
+In conclusion, the enormous quantity of NBA player data and machine learning's potential are crucial for improving our comprehension of player performance. We can improve our comprehension of player dynamics and make more informed decisions on team strategy, player evaluation, and award considerations by looking at clusters. The clustering approach can give us important information about player performance. We can better grasp the relationships between various statistics and how they relate to player groups by using visual representations. Furthermore, our analysis extends to defensive aspects often overlooked in player evaluations. Players excelling in one area may not excel in the other. Aside from that, centers and power forwards display an inclination for blocking over stealing. This underscores the importance of considering positional differences in defensive capabilities.
