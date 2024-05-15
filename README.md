@@ -1,4 +1,4 @@
 # Data Mining Final
 
-Final data mining group project that was done in my last Spring semester. The enormous quantity of NBA player data and machine learning's potential are crucial for improving our comprehension of player performance. We can improve our comprehension of player dynamics and make more informed decisions on team strategy, player evaluation, and award considerations by looking at clusters. 
+Final data mining group project that was done in my last semester. The enormous quantity of NBA player data and machine learning's potential are crucial for improving our comprehension of player performance. We can improve our comprehension of player dynamics and make more informed decisions on team strategy, player evaluation, and award considerations by looking at clusters. 
 
